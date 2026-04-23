@@ -16,6 +16,7 @@
     "next": "latest",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.0",
+    "pg": "^8.20.0",
     "puppeteer": "^22.0.0",
     "react": "latest",
     "react-dom": "latest",
