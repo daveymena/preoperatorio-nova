@@ -1,0 +1,28 @@
+{
+  "name": "preoperacional-saas",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "worker": "node scheduler.js"
+  },
+  "dependencies": {
+    "@swc/helpers": "^0.5.21",
+    "lucide-react": "^0.300.0",
+    "mercadopago": "^2.12.0",
+    "next": "latest",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.0",
+    "puppeteer": "^22.0.0",
+    "react": "latest",
+    "react-dom": "latest",
+    "sqlite3": "^5.1.0"
+  },
+  "devDependencies": {
+    "browserslist": "^4.28.2",
+    "caniuse-lite": "^1.0.30001790"
+  }
+}
