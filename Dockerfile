@@ -23,8 +23,10 @@ COPY . .
 # Build Next.js
 RUN npm run build
 
+# Make start script executable
+RUN chmod +x start.sh
+
 EXPOSE 3000
 
-# Script to start both the web server and a background job if needed
-# For now, just the web server. The worker can be triggered via a cron job in Easypanel.
-CMD ["npm", "start"]
+# Start both web server and scheduler
+CMD ["./start.sh"]

@@ -61,6 +61,19 @@ export default function Admin({ users }) {
     }
   };
 
+  const runAll = async () => {
+    if (!confirm('¿Deseas ejecutar la automatización para TODOS los usuarios activos ahora mismo?')) return;
+    setStatus({ type: 'info', message: 'Iniciando proceso masivo...' });
+    try {
+      const res = await fetch('/api/run-all', { method: 'POST' });
+      const data = await res.json();
+      setStatus({ type: res.ok ? 'success' : 'error', message: data.message });
+      if (res.ok) setTimeout(() => router.replace(router.asPath), 5000);
+    } catch {
+      setStatus({ type: 'error', message: 'Error de conexión' });
+    }
+  };
+
   const deleteUser = async (id) => {
     if (!confirm('¿Eliminar este usuario?')) return;
     try {
@@ -86,9 +99,14 @@ export default function Admin({ users }) {
           <h1 style={{ marginBottom: '0.25rem' }}>Panel de Administración</h1>
           <p style={{ color: '#94a3b8' }}>Gestiona los preoperacionales automatizados</p>
         </div>
-        <button onClick={() => router.replace(router.asPath)} style={{ background: '#1e293b', border: '1px solid #334155', color: '#94a3b8', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <RefreshCw size={16} /> Actualizar
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button onClick={runAll} style={{ background: 'rgba(56,189,248,0.1)', border: '1px solid #38bdf844', color: '#38bdf8', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600' }}>
+            <Play size={16} /> Ejecutar Todos
+          </button>
+          <button onClick={() => router.replace(router.asPath)} style={{ background: '#1e293b', border: '1px solid #334155', color: '#94a3b8', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <RefreshCw size={16} /> Actualizar
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

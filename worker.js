@@ -122,6 +122,7 @@ async function processUser(user) {
   console.log(`🚀 Procesando a: ${user.nombre} (${user.placa})`);
   const browser = await puppeteer.launch({
     headless: "new",
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
   
