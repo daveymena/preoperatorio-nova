@@ -9,7 +9,9 @@
     "lint": "next lint",
     "worker": "node scheduler.js",
     "daily-worker": "node worker.js",
-    "reactivate": "node reactivate-all.js"
+    "reactivate": "node reactivate-all.js",
+    "export-users": "node export-users.js",
+    "import-users": "node import-users.js"
   },
   "dependencies": {
     "@swc/helpers": "^0.5.21",
