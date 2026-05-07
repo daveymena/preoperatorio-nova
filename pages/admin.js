@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { Play, Trash2, Loader2, CheckCircle2, XCircle, RefreshCw, Crown } from 'lucide-react';
+import { Play, Trash2, Loader2, CheckCircle2, XCircle, RefreshCw, Crown, Users, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 
@@ -79,6 +79,36 @@ export default function Admin({ users }) {
     }
   };
 
+  const reactivateAll = async () => {
+    if (!confirm('¿Reactivar TODOS los usuarios por 5 días más?')) return;
+    setStatus({ type: 'info', message: 'Reactivando usuarios...' });
+    try {
+      const res = await fetch('/api/reactivate-all', { method: 'POST' });
+      const data = await res.json();
+      setStatus({ type: res.ok ? 'success' : 'error', message: data.message });
+      if (res.ok) setTimeout(() => router.replace(router.asPath), 2000);
+    } catch {
+      setStatus({ type: 'error', message: 'Error al reactivar' });
+    }
+  };
+
+  const viewAllUsers = async () => {
+    setStatus({ type: 'info', message: 'Cargando información de usuarios...' });
+    try {
+      const res = await fetch('/api/list-all-users');
+      const data = await res.json();
+      if (res.ok) {
+        const info = `Total: ${data.total}\nActivos: ${data.activos}\nInactivos: ${data.inactivos}\n\nUsuarios:\n${data.users.map(u => `- ${u.nombre} (${u.email}) - ${u.active ? 'Activo' : 'Inactivo'}`).join('\n')}`;
+        alert(info);
+        setStatus({ type: 'success', message: `${data.total} usuarios encontrados` });
+      } else {
+        setStatus({ type: 'error', message: data.message });
+      }
+    } catch {
+      setStatus({ type: 'error', message: 'Error al cargar usuarios' });
+    }
+  };
+
   const deleteUser = async (id) => {
     if (!confirm('¿Eliminar este usuario?')) return;
     try {
@@ -105,6 +135,12 @@ export default function Admin({ users }) {
           <p style={{ color: '#94a3b8' }}>Gestiona los preoperacionales automatizados</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button onClick={viewAllUsers} style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid #8b5cf644', color: '#8b5cf6', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600' }}>
+            <Users size={16} /> Ver Todos
+          </button>
+          <button onClick={reactivateAll} style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid #22c55e44', color: '#22c55e', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600' }}>
+            <RotateCcw size={16} /> Reactivar Todos (5d)
+          </button>
           <button onClick={runAll} style={{ background: 'rgba(56,189,248,0.1)', border: '1px solid #38bdf844', color: '#38bdf8', padding: '0.5rem 1rem', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: '600' }}>
             <Play size={16} /> Ejecutar Todos
           </button>
