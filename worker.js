@@ -41,6 +41,14 @@ async function checkSubscriptions() {
   const users = await all(`SELECT * FROM users WHERE subscription_status != 'expired' OR active = 1`);
   
   for (const user of users) {
+    // Duvier es VIP: Siempre activo y premium sin pago
+    if (user.email === 'daveymena16@gmail.com' || user.nombre.toLowerCase().includes('duvier')) {
+      if (user.subscription_status !== 'active' || user.active !== 1) {
+        await run(`UPDATE users SET subscription_status = 'active', active = 1 WHERE id = ?`, [user.id]);
+      }
+      continue;
+    }
+
     const trialEnd = new Date(user.subscription_until || user.trial_start);
     const daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
 
@@ -85,38 +93,8 @@ async function verifyWithOllama(screenshotPath) {
   }
 }
 
-async function sendEmail(user, screenshot, success = true) {
-  const transporter = nodemailer.createTransport({
-    host: CONFIG.smtp.host,
-    port: CONFIG.smtp.port,
-    secure: CONFIG.smtp.secure,
-    auth: { user: CONFIG.smtp.user, pass: CONFIG.smtp.pass }
-  });
+// El envío de correos ahora se maneja desde lib/emails.js
 
-  const attachments = [];
-  if (fs.existsSync(screenshot)) attachments.push({ path: screenshot });
-
-  const subject = success 
-    ? `✅ Preoperacional Exitoso - ${user.nombre}` 
-    : `❌ Error en Preoperacional - ${user.nombre}`;
-
-  const html = success
-    ? `<h3>Preoperacional Completado</h3><p>Hola ${user.nombre}, tu preoperacional se ha completado hoy exitosamente.</p>`
-    : `<h3>Error en Preoperacional</h3><p>Hola ${user.nombre}, hubo un error al procesar tu preoperacional. Por favor revisa la captura adjunta.</p>`;
-
-  try {
-    await transporter.sendMail({
-      from: CONFIG.emailFrom,
-      to: user.email,
-      subject: subject,
-      html: html,
-      attachments
-    });
-    console.log(`📧 Correo enviado a ${user.email}`);
-  } catch (e) {
-    console.error(`❌ Error enviando correo a ${user.email}:`, e.message);
-  }
-}
 
 async function processUser(user) {
   console.log(`🚀 Procesando a: ${user.nombre} (${user.placa})`);

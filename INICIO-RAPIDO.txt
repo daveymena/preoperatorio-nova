@@ -1,0 +1,89 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                  🚀 INICIO RÁPIDO - EASYPANEL                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+✅ SISTEMA ACTUALIZADO CON:
+   • Reactivación automática de usuarios (5 días)
+   • Ventana de ejecución 6 AM - 12 PM con reintentos
+   • Una ejecución exitosa por día
+   • Completamente automático
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 PASOS PARA DESPLEGAR:
+
+1. SUBIR A GITHUB
+   cd preoperacional-saas
+   git add .
+   git commit -m "Sistema con reactivación automática"
+   git push origin main
+
+2. CREAR SERVICIO EN EASYPANEL
+   • Nuevo servicio desde GitHub
+   • Seleccionar repositorio
+   • Puerto: 3000
+   • Variables (opcional):
+     - MERCADO_PAGO_ACCESS_TOKEN
+     - NEXT_PUBLIC_BASE_URL
+
+3. DESPLEGAR
+   • Easypanel construye automáticamente
+   • Al iniciar:
+     ✅ Reactiva usuarios por 5 días
+     ✅ Inicia servidor web
+     ✅ Inicia scheduler (6 AM - 12 PM)
+
+4. VERIFICAR
+   • Abre tu dominio en el navegador
+   • Revisa logs en Easypanel
+   • Espera ejecución (6 AM - 12 PM)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛠️ COMANDOS ÚTILES:
+
+npm run reactivate      → Reactivar usuarios por 5 días
+node verify-system.js   → Verificar sistema completo
+node test-scheduler.js  → Probar scheduler
+node list-users.js      → Ver usuarios registrados
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 DOCUMENTACIÓN:
+
+README.md           → Guía general
+DESPLIEGUE.md       → Guía detallada de despliegue
+CAMBIOS.md          → Cambios técnicos implementados
+RESUMEN-FINAL.md    → Resumen ejecutivo completo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏰ VENTANA DE EJECUCIÓN:
+
+6:00 AM  → Primer intento
+7:00 AM  → Reintento (si falló)
+8:00 AM  → Reintento (si falló)
+9:00 AM  → Reintento (si falló)
+10:00 AM → Reintento (si falló)
+11:00 AM → Reintento (si falló)
+12:00 PM → Último intento
+
+✅ Una vez exitoso → No vuelve a ejecutar ese día
+🌙 A medianoche → Reset para el día siguiente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ ESTADO ACTUAL:
+
+Sistema verificado: ✅
+Usuarios activos: 1 (Duvier Prueba)
+Última ejecución: 6/5/2026, 6:07:38 a. m.
+Próxima ejecución: Mañana 6 AM - 12 PM
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 ¡LISTO PARA PRODUCCIÓN!
+
+Próximo paso: git push y desplegar en Easypanel
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

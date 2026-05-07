@@ -14,6 +14,21 @@ Este sistema permite automatizar el preoperacional de hasta 500+ personas usando
 3. Abre tu navegador en: `http://localhost:3000`
 4. Inicia el programador (en otra terminal): `npm run worker`
 
+## Reactivar usuarios por 5 días
+Para extender la suscripción de todos los usuarios por 5 días más:
+```bash
+node reactivate-all.js
+```
+
+## Sistema de Ejecución Automática
+El scheduler ahora funciona con **ventana de ejecución inteligente**:
+- ⏰ **Ventana de ejecución**: 6:00 AM - 12:00 PM (hora de Colombia)
+- 🔄 **Reintentos automáticos**: Cada hora dentro de la ventana si no se ha ejecutado
+- ✅ **Una vez al día**: Solo se ejecuta una vez exitosamente por día
+- 🌙 **Reset automático**: A medianoche se resetea para el día siguiente
+
+**Ejemplo**: Si a las 6 AM falla por algún motivo (internet, servidor caído, etc.), el sistema reintentará a las 7 AM, 8 AM, y así sucesivamente hasta las 12 PM. Una vez que se ejecute exitosamente, no volverá a intentar ese día.
+
 ## Cómo desplegar en Easypanel / Docker
 1. Sube este proyecto a un repositorio de GitHub.
 2. En Easypanel, crea un nuevo "Service" desde GitHub.

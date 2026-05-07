@@ -4,6 +4,9 @@
 echo "🚀 Iniciando Servidor Web (Next.js)..."
 npm start &
 
-# Iniciar el programador de tareas (Scheduler) en primer plano para mantener el contenedor vivo
-echo "📅 Iniciando Scheduler de Preoperacionales..."
-npm run worker
+# Esperar un momento para que Next.js inicie
+sleep 3
+
+# Iniciar el sistema con reactivación automática y scheduler
+echo "📅 Iniciando Sistema de Automatización..."
+node startup.js

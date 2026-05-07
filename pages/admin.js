@@ -11,6 +11,11 @@ export async function getServerSideProps() {
 }
 
 function getSubscriptionBadge(user) {
+  // Duvier es VIP permanente
+  if (user.email === 'daveymena16@gmail.com' || (user.nombre && user.nombre.toLowerCase().includes('duvier'))) {
+    return { label: '💎 VIP Premium', color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' };
+  }
+
   const status = user.subscription_status || 'trial';
   const now = new Date();
   const trialEnd = user.subscription_until ? new Date(user.subscription_until) : null;

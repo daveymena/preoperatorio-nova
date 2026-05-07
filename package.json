@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "worker": "node scheduler.js",
-    "daily-worker": "node worker.js"
+    "daily-worker": "node worker.js",
+    "reactivate": "node reactivate-all.js"
   },
   "dependencies": {
     "@swc/helpers": "^0.5.21",
