@@ -11,7 +11,11 @@
     "daily-worker": "node worker.js",
     "reactivate": "node reactivate-all.js",
     "export-users": "node export-users.js",
-    "import-users": "node import-users.js"
+    "import-users": "node import-users.js",
+    "verify": "node verify-easypanel.js",
+    "test-analyzer": "node test-analyzer.js",
+    "test-g4f": "node test-g4f.js",
+    "install-g4f": "bash install-g4f.sh"
   },
   "dependencies": {
     "@swc/helpers": "^0.5.21",
@@ -24,7 +28,8 @@
     "puppeteer": "^22.0.0",
     "react": "latest",
     "react-dom": "latest",
-    "sqlite3": "^5.1.0"
+    "sqlite3": "^5.1.0",
+    "g4f": "latest"
   },
   "devDependencies": {
     "browserslist": "^4.28.2",

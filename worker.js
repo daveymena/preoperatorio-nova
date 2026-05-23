@@ -2,14 +2,31 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const { all, run } = require('./lib/db');
 const { sendEvidenceEmail, sendTrialExpiryWarningEmail, sendExpiredEmail } = require('./lib/emails');
+const FormAnalyzer = require('./lib/form-analyzer');
+const VisualAnalyzer = require('./lib/visual-analyzer');
 
 const CONFIG = {
   url: 'https://www.conectartv.com/SRCGC/Movilidad/preop_moto.php',
-  ollama: {
-    url: 'http://localhost:11434/api/generate',
-    model: 'qwen3.5:cloud'
-  }
+  maxRetries: 3,
+  timeout: 60000
 };
+
+// Crear directorio de logs si no existe
+const logsDir = process.env.NODE_ENV === 'production' ? '/app/logs' : './logs';
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+// Función para registrar en archivo
+function logToFile(message) {
+  const timestamp = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+  const logMessage = `[${timestamp}] ${message}\n`;
+  try {
+    fs.appendFileSync(`${logsDir}/worker.log`, logMessage);
+  } catch (e) {
+    console.error('Error escribiendo log:', e.message);
+  }
+}
 
 // Generar link de pago MercadoPago para un usuario
 async function generatePaymentLink(user) {
@@ -70,30 +87,6 @@ async function checkSubscriptions() {
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-async function verifyWithOllama(screenshotPath) {
-  console.log('🔍 Verificación visual con Ollama...');
-  try {
-    const imageBase64 = fs.readFileSync(screenshotPath, { encoding: 'base64' });
-    const response = await fetch(CONFIG.ollama.url, {
-      method: 'POST',
-      body: JSON.stringify({
-        model: CONFIG.ollama.model,
-        prompt: "Analiza esta captura de pantalla de un formulario preoperacional. ¿Están todos los campos llenos? ¿Ves algún campo en rojo o vacío? Responde 'OK' si todo está bien, o indica qué falta.",
-        stream: false,
-        images: [imageBase64]
-      })
-    });
-    const data = await response.json();
-    console.log('🤖 Respuesta IA:', data.response);
-    return data.response;
-  } catch (e) { 
-    console.error('❌ Error Ollama:', e.message);
-    return 'ERROR'; 
-  }
-}
-
-// El envío de correos ahora se maneja desde lib/emails.js
 
 
 async function processUser(user) {
@@ -191,9 +184,6 @@ async function processUser(user) {
 
     await sleep(2000);
     await page.screenshot({ path: shot, fullPage: true });
-    
-    // Verificación IA
-    const iaResult = await verifyWithOllama(shot);
     
     console.log(`  [${user.nombre}] Buscando botón de envío...`);
     const btnSubmit = await page.evaluateHandle(() => {

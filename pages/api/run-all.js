@@ -1,4 +1,4 @@
-const { startWorker } = require('../../worker');
+import { startWorker } from '../../worker.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

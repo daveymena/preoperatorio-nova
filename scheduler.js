@@ -1,10 +1,29 @@
 const cron = require('node-cron');
 const { startWorker } = require('./worker');
 const { get, run } = require('./lib/db');
+const fs = require('fs');
 
 // Variable para rastrear si ya se ejecutó hoy
 let executedToday = false;
 let lastExecutionDate = null;
+let lastExecutionError = null;
+
+// Crear directorio de logs si no existe
+const logsDir = process.env.NODE_ENV === 'production' ? '/app/logs' : './logs';
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+// Función para registrar en archivo
+function logToFile(message) {
+  const timestamp = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+  const logMessage = `[${timestamp}] ${message}\n`;
+  try {
+    fs.appendFileSync(`${logsDir}/scheduler.log`, logMessage);
+  } catch (e) {
+    console.error('Error escribiendo log:', e.message);
+  }
+}
 
 // Función para verificar si ya se ejecutó hoy
 async function checkIfExecutedToday() {
@@ -25,7 +44,7 @@ async function checkIfExecutedToday() {
       }
     }
   } catch (e) {
-    console.error('Error verificando última ejecución:', e.message);
+    logToFile(`⚠️ Error verificando última ejecución: ${e.message}`);
   }
   
   return false;
@@ -36,18 +55,25 @@ async function executeWorkerIfNeeded() {
   const alreadyExecuted = await checkIfExecutedToday();
   
   if (alreadyExecuted) {
+    logToFile('✅ El preoperacional ya fue ejecutado hoy. Saltando...');
     console.log('✅ El preoperacional ya fue ejecutado hoy. Saltando...');
     return;
   }
   
+  logToFile('🚀 Iniciando ejecución del preoperacional...');
   console.log('🚀 Iniciando ejecución del preoperacional...');
+  
   try {
     await startWorker();
     const today = new Date().toISOString().split('T')[0];
     lastExecutionDate = today;
     executedToday = true;
+    lastExecutionError = null;
+    logToFile('✅ Ejecución completada exitosamente.');
     console.log('✅ Ejecución completada exitosamente.');
   } catch (error) {
+    lastExecutionError = error.message;
+    logToFile(`❌ Error durante la ejecución: ${error.message}`);
     console.error('❌ Error durante la ejecución:', error.message);
   }
 }
@@ -59,8 +85,13 @@ const hoursToTry = [6, 7, 8, 9, 10, 11, 12];
 hoursToTry.forEach(hour => {
   cron.schedule(`0 ${hour} * * *`, () => {
     const now = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-    console.log(`⏰ [${hour}:00] Verificando si es necesario ejecutar el preoperacional...`);
-    executeWorkerIfNeeded();
+    const msg = `⏰ [${hour}:00] Verificando si es necesario ejecutar el preoperacional...`;
+    logToFile(msg);
+    console.log(msg);
+    executeWorkerIfNeeded().catch(e => {
+      logToFile(`❌ Error no capturado: ${e.message}`);
+      console.error('❌ Error no capturado:', e.message);
+    });
   }, {
     timezone: 'America/Bogota'
   });
@@ -70,7 +101,9 @@ hoursToTry.forEach(hour => {
 cron.schedule('0 0 * * *', () => {
   executedToday = false;
   lastExecutionDate = null;
-  console.log('🌙 Nuevo día iniciado. Flag de ejecución reseteado.');
+  const msg = '🌙 Nuevo día iniciado. Flag de ejecución reseteado.';
+  logToFile(msg);
+  console.log(msg);
 }, {
   timezone: 'America/Bogota'
 });
@@ -79,11 +112,23 @@ cron.schedule('0 0 * * *', () => {
 cron.schedule('0 * * * *', () => {
   const now = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
   const status = executedToday ? '✅ Ejecutado hoy' : '⏳ Pendiente';
-  console.log(`📡 [Heartbeat] Scheduler activo | ${now} | ${status}`);
+  const errorInfo = lastExecutionError ? ` | Error: ${lastExecutionError}` : '';
+  const msg = `📡 [Heartbeat] Scheduler activo | ${now} | ${status}${errorInfo}`;
+  logToFile(msg);
+  console.log(msg);
 });
 
-console.log('📅 Scheduler de Preoperacionales activo');
-console.log('⏰ Ventana de ejecución: 6:00 AM - 12:00 PM (Colombia)');
-console.log('🔄 Reintentos cada hora si no se ha ejecutado');
+// Logs iniciales
 const startupTime = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
-console.log(`🚀 Proceso iniciado el: ${startupTime}`);
+const initMsg = `
+═══════════════════════════════════════════════════════════
+📅 SCHEDULER DE PREOPERACIONALES ACTIVO
+═══════════════════════════════════════════════════════════
+⏰ Ventana de ejecución: 6:00 AM - 12:00 PM (Colombia)
+🔄 Reintentos cada hora si no se ha ejecutado
+🚀 Proceso iniciado el: ${startupTime}
+═══════════════════════════════════════════════════════════
+`;
+
+logToFile(initMsg);
+console.log(initMsg);

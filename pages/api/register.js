@@ -1,6 +1,7 @@
+import { run, get } from '../../lib/db-esm.js';
+import { sendWelcomeEmail } from '../../lib/emails.js';
+
 export default async function handler(req, res) {
-  const { run, get } = require('../../lib/db');
-  const { sendWelcomeEmail } = require('../../lib/emails');
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }

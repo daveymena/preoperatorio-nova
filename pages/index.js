@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { UserPlus, CheckCircle, ShieldCheck, Zap, Clock, CreditCard } from 'lucide-react';
 
 export default function Home() {
@@ -76,6 +77,14 @@ export default function Home() {
         <title>Nova 360 — Automatización de Preoperacional</title>
         <meta name="description" content="Regístrate y automatiza tu preoperacional diario. 5 días gratis." />
       </Head>
+
+      {/* Navigation Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700' }}>Nova 360</h2>
+        <Link href="/dashboard" style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: '600', fontSize: '0.95rem', padding: '0.5rem 1rem', borderRadius: '0.5rem', background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.2)', transition: 'all 0.2s ease' }} onMouseEnter={e => { e.target.style.background = 'rgba(56,189,248,0.2)'; }} onMouseLeave={e => { e.target.style.background = 'rgba(56,189,248,0.1)'; }}>
+          🎛️ Dashboard
+        </Link>
+      </div>
 
       <div style={{ textAlign: 'center', marginBottom: '3rem' }} className="animate-fade">
         <h1>Nova 360 Automation</h1>

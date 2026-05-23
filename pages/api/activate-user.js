@@ -1,4 +1,4 @@
-const { run, get } = require('../../lib/db');
+import { run, get } from '../../lib/db-esm.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });

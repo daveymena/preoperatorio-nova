@@ -1,4 +1,4 @@
-const { all, run } = require('../../lib/db');
+import { all, run } from '../../lib/db-esm.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

@@ -8,15 +8,37 @@
 
 const { spawn } = require('child_process');
 const { all, run } = require('./lib/db');
+const fs = require('fs');
+
+// Crear directorio de logs si no existe
+const logsDir = process.env.NODE_ENV === 'production' ? '/app/logs' : './logs';
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+// Función para registrar en archivo
+function logToFile(message) {
+  const timestamp = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
+  const logMessage = `[${timestamp}] ${message}\n`;
+  try {
+    fs.appendFileSync(`${logsDir}/startup.log`, logMessage);
+  } catch (e) {
+    console.error('Error escribiendo log:', e.message);
+  }
+}
 
 async function reactivateAllUsers() {
-  console.log('🔄 Reactivando todos los usuarios por 5 días...\n');
+  const msg = '🔄 Reactivando todos los usuarios por 5 días...\n';
+  console.log(msg);
+  logToFile(msg);
   
   try {
     const users = await all(`SELECT * FROM users`);
     
     if (users.length === 0) {
-      console.log('⚠️ No hay usuarios registrados aún.');
+      const warnMsg = '⚠️ No hay usuarios registrados aún.';
+      console.log(warnMsg);
+      logToFile(warnMsg);
       return;
     }
     
@@ -24,61 +46,91 @@ async function reactivateAllUsers() {
     const fiveDaysLater = new Date(now.getTime() + (5 * 24 * 60 * 60 * 1000));
     
     for (const user of users) {
-      await run(
-        `UPDATE users SET 
-          subscription_status = 'active', 
-          active = 1, 
-          subscription_until = ? 
-        WHERE id = ?`,
-        [fiveDaysLater.toISOString(), user.id]
-      );
-      
-      console.log(`✅ ${user.nombre} - Reactivado hasta ${fiveDaysLater.toLocaleDateString('es-CO')}`);
+      try {
+        await run(
+          `UPDATE users SET 
+            subscription_status = 'active', 
+            active = 1, 
+            subscription_until = ? 
+          WHERE id = ?`,
+          [fiveDaysLater.toISOString(), user.id]
+        );
+        
+        const userMsg = `✅ ${user.nombre} - Reactivado hasta ${fiveDaysLater.toLocaleDateString('es-CO')}`;
+        console.log(userMsg);
+        logToFile(userMsg);
+      } catch (e) {
+        const errorMsg = `❌ Error reactivando ${user.nombre}: ${e.message}`;
+        console.error(errorMsg);
+        logToFile(errorMsg);
+      }
     }
     
-    console.log(`\n🎉 ${users.length} usuarios reactivados exitosamente.`);
-    console.log(`📅 Expiración: ${fiveDaysLater.toLocaleDateString('es-CO')} ${fiveDaysLater.toLocaleTimeString('es-CO')}\n`);
+    const successMsg = `\n🎉 ${users.length} usuarios reactivados exitosamente.\n📅 Expiración: ${fiveDaysLater.toLocaleDateString('es-CO')} ${fiveDaysLater.toLocaleTimeString('es-CO')}\n`;
+    console.log(successMsg);
+    logToFile(successMsg);
     
   } catch (error) {
-    console.error('❌ Error reactivando usuarios:', error.message);
+    const errorMsg = `❌ Error reactivando usuarios: ${error.message}`;
+    console.error(errorMsg);
+    logToFile(errorMsg);
   }
 }
 
 async function startScheduler() {
-  console.log('🚀 Iniciando scheduler...\n');
+  const msg = '🚀 Iniciando scheduler...\n';
+  console.log(msg);
+  logToFile(msg);
   
   // Iniciar el scheduler como proceso hijo
   const scheduler = spawn('node', ['scheduler.js'], {
     stdio: 'inherit',
-    cwd: __dirname
+    cwd: __dirname,
+    env: {
+      ...process.env,
+      NODE_ENV: 'production',
+      TZ: 'America/Bogota'
+    }
   });
   
   scheduler.on('error', (error) => {
-    console.error('❌ Error iniciando scheduler:', error);
+    const errorMsg = `❌ Error iniciando scheduler: ${error.message}`;
+    console.error(errorMsg);
+    logToFile(errorMsg);
     process.exit(1);
   });
   
   scheduler.on('exit', (code) => {
-    console.log(`⚠️ Scheduler terminó con código ${code}`);
+    const exitMsg = `⚠️ Scheduler terminó con código ${code}`;
+    console.log(exitMsg);
+    logToFile(exitMsg);
     process.exit(code);
   });
   
   // Manejar señales de terminación
   process.on('SIGTERM', () => {
-    console.log('📡 Recibida señal SIGTERM, cerrando...');
+    const msg = '📡 Recibida señal SIGTERM, cerrando...';
+    console.log(msg);
+    logToFile(msg);
     scheduler.kill('SIGTERM');
   });
   
   process.on('SIGINT', () => {
-    console.log('📡 Recibida señal SIGINT, cerrando...');
+    const msg = '📡 Recibida señal SIGINT, cerrando...';
+    console.log(msg);
+    logToFile(msg);
     scheduler.kill('SIGINT');
   });
 }
 
 async function main() {
-  console.log('═══════════════════════════════════════════════════');
-  console.log('🚀 NOVA 360 AUTOMATION - INICIO DEL SISTEMA');
-  console.log('═══════════════════════════════════════════════════\n');
+  const header = `
+═══════════════════════════════════════════════════════════
+🚀 NOVA 360 AUTOMATION - INICIO DEL SISTEMA
+═══════════════════════════════════════════════════════════
+`;
+  console.log(header);
+  logToFile(header);
   
   // Paso 1: Reactivar usuarios
   await reactivateAllUsers();
@@ -88,6 +140,8 @@ async function main() {
 }
 
 main().catch(error => {
-  console.error('❌ Error fatal:', error);
+  const errorMsg = `❌ Error fatal: ${error.message}`;
+  console.error(errorMsg);
+  logToFile(errorMsg);
   process.exit(1);
 });

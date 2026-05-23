@@ -1,6 +1,11 @@
 // POST /api/mp-webhook
 // Recibe notificaciones de MercadoPago y activa la suscripción automáticamente
 
+import { run, get } from '../../lib/db-esm.js';
+import { sendWelcomeEmail } from '../../lib/emails.js';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
+import nodemailer from 'nodemailer';
+
 export const config = {
   api: { bodyParser: true },
 };
@@ -9,9 +14,6 @@ export default async function handler(req, res) {
   // MercadoPago envía GET para validación y POST para notificaciones
   if (req.method === 'GET') return res.status(200).send('OK');
   if (req.method !== 'POST') return res.status(405).end();
-
-  const { run, get } = require('../../lib/db');
-  const { sendWelcomeEmail } = require('../../lib/emails');
 
   try {
     const { type, data } = req.body;
@@ -22,7 +24,6 @@ export default async function handler(req, res) {
     }
 
     // Consultar el pago a la API de MercadoPago
-    const { MercadoPagoConfig, Payment } = require('mercadopago');
     const client = new MercadoPagoConfig({
       accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
     });
@@ -64,7 +65,6 @@ export default async function handler(req, res) {
     console.log(`✅ Suscripción activada para ${user.nombre} hasta ${newUntil.toLocaleDateString('es-CO')}`);
 
     // Enviar email de confirmación de pago
-    const nodemailer = require('nodemailer');
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT),

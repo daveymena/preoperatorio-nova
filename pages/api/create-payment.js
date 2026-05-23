@@ -1,6 +1,8 @@
 // POST /api/create-payment
 // Genera un link de pago de MercadoPago para la suscripción mensual
 
+import { MercadoPagoConfig, Preference } from 'mercadopago';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
@@ -8,9 +10,6 @@ export default async function handler(req, res) {
   if (!userId) return res.status(400).json({ message: 'Missing userId' });
 
   try {
-    const { MercadoPagoConfig, Preference } = require('mercadopago');
-
-    const client = new MercadoPagoConfig({
       accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
     });
 

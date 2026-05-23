@@ -1,5 +1,5 @@
-const { get } = require('../../lib/db');
-const { processUser } = require('../../worker');
+import { get } from '../../lib/db-esm.js';
+import { processUser } from '../../worker.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
