@@ -10,6 +10,7 @@ export default async function handler(req, res) {
   if (!userId) return res.status(400).json({ message: 'Missing userId' });
 
   try {
+    const client = new MercadoPagoConfig({
       accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
     });
 
