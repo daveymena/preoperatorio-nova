@@ -1,0 +1,12 @@
+BUILD_VERSION=2.0.0
+BUILD_DATE=2026-05-23
+BUILD_REASON=Force rebuild - Ollama removed, G4F integrated, fallback mode enabled
+CHANGES=
+- Removed Ollama dependency
+- Integrated G4F (111+ free AI models)
+- Added fallback mode (works without AI)
+- Fixed create-payment.js syntax error
+- Dashboard fully functional
+- System works with or without AI
+
+STATUS=READY_FOR_PRODUCTION
