@@ -303,7 +303,18 @@ async function processUser(user) {
 
       success = successFound;
     } else {
-      console.warn(`  [${user.nombre}] No se encontró el botón de envío.`);
+      console.warn(`  [${user.nombre}] ❌ No se encontró el botón de envío.`);
+      success = false;
+    }
+
+    // Verificar que la captura se guardó
+    const shotExists = fs.existsSync(shot);
+    if (shotExists) {
+      const shotSize = fs.statSync(shot).size;
+      console.log(`  ✅ Captura guardada: ${shot} (${shotSize} bytes)`);
+    } else {
+      console.error(`  ❌ ADVERTENCIA: Captura NO se guardó: ${shot}`);
+      success = false;
     }
     
     await sendEvidenceEmail(user, shot, true);
