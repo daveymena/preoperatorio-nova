@@ -200,22 +200,64 @@ async function processUser(user) {
       await el.click();
       console.log(`  [${user.nombre}] Botón clickeado. Esperando confirmación...`);
       
-      // Esperar a que aparezca un mensaje de éxito en el DOM
-      await page.waitForFunction(() => {
-        const text = document.body.innerText || '';
-        const hasSuccessText = text.toLowerCase().includes('guardado') || 
-                               text.toLowerCase().includes('exitoso') || 
-                               text.toLowerCase().includes('completado');
-        const hasSwal = !!document.querySelector('.swal2-popup, .swal2-success, .swal2-title');
-        const hasAlert = !!document.querySelector('.alert-success, .toast-success');
-        return hasSuccessText || hasSwal || hasAlert;
-      }, { timeout: 15000 }).catch(() => {
-        console.log(`  [${user.nombre}] Timeout esperando confirmación visual, procediendo con captura de respaldo.`);
-      });
+      // Esperar confirmación y tomar foto INMEDIATAMENTE cuando aparezca
+      let successFound = false;
+      try {
+        // Monitorear cambios en tiempo real
+        const screenshotTaken = await page.evaluate(async () => {
+          return new Promise((resolve) => {
+            let checkCount = 0;
+            const maxChecks = 200; // 20 segundos con 100ms de intervalo
+            
+            const checkForSuccess = async () => {
+              checkCount++;
+              
+              const text = document.body.innerText || '';
+              const hasSuccessText = text.toLowerCase().includes('guardado') || 
+                                     text.toLowerCase().includes('exitoso') || 
+                                     text.toLowerCase().includes('completado') ||
+                                     text.toLowerCase().includes('éxito') ||
+                                     text.toLowerCase().includes('exito') ||
+                                     text.toLowerCase().includes('success');
+              
+              const hasSwal = !!document.querySelector('.swal2-popup, .swal2-success, .swal2-title, .swal-modal');
+              const hasAlert = !!document.querySelector('.alert-success, .toast-success, .alert, [role="alert"]');
+              const hasModal = !!document.querySelector('.modal.show, .modal.in, [role="dialog"]');
+              
+              if (hasSuccessText || hasSwal || hasAlert || hasModal) {
+                resolve(true);
+              } else if (checkCount >= maxChecks) {
+                resolve(false);
+              } else {
+                setTimeout(checkForSuccess, 100);
+              }
+            };
+            
+            checkForSuccess();
+          });
+        });
 
-      await sleep(2000);
-      await page.screenshot({ path: shot, fullPage: true });
-      console.log(`  [${user.nombre}] Captura final tomada.`);
+        if (screenshotTaken) {
+          successFound = true;
+          console.log(`  [${user.nombre}] ✅ Mensaje de éxito detectado. Tomando captura INMEDIATA...`);
+          
+          // Tomar foto INMEDIATAMENTE sin esperar
+          await page.screenshot({ path: shot, fullPage: true });
+          console.log(`  [${user.nombre}] 📸 Captura tomada en el INSTANTE exacto del éxito.`);
+        } else {
+          throw new Error('No se detectó mensaje de éxito');
+        }
+        
+      } catch (e) {
+        console.log(`  [${user.nombre}] ⏱️ No se detectó confirmación, tomando captura de respaldo...`);
+        
+        // Tomar captura de respaldo después de esperar
+        await sleep(2000);
+        await page.screenshot({ path: shot, fullPage: true });
+        console.log(`  [${user.nombre}] 📸 Captura de respaldo tomada.`);
+      }
+
+      success = successFound;
     } else {
       console.warn(`  [${user.nombre}] No se encontró el botón de envío.`);
     }
