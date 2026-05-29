@@ -159,6 +159,33 @@ async function processUser(user) {
         }
       });
       
+      // Checkboxes de aceptación (salud, condiciones, etc.)
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        const label = document.querySelector(`label[for="${cb.id}"]`)?.textContent || '';
+        const name = (cb.name || '').toLowerCase();
+        const id = (cb.id || '').toLowerCase();
+        
+        // Buscar checkboxes de aceptación/confirmación
+        const isAcceptance = label.toLowerCase().includes('aceptar') ||
+          label.toLowerCase().includes('condiciones') ||
+          label.toLowerCase().includes('salud') ||
+          label.toLowerCase().includes('óptimas') ||
+          label.toLowerCase().includes('confirmo') ||
+          label.toLowerCase().includes('acepto') ||
+          name.includes('aceptar') ||
+          name.includes('acepto') ||
+          name.includes('confirmo') ||
+          id.includes('aceptar') ||
+          id.includes('acepto') ||
+          id.includes('confirmo');
+        
+        if (isAcceptance && !cb.checked) {
+          cb.click();
+          cb.checked = true;
+          cb.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+      
       // Textareas
       document.querySelectorAll('textarea').forEach(t => {
         if (!t.value) {
@@ -203,28 +230,42 @@ async function processUser(user) {
       // Esperar confirmación y tomar foto INMEDIATAMENTE cuando aparezca
       let successFound = false;
       try {
-        // Monitorear cambios en tiempo real
+        // Monitorear cambios en tiempo real con más opciones de detección
         const screenshotTaken = await page.evaluate(async () => {
           return new Promise((resolve) => {
             let checkCount = 0;
-            const maxChecks = 200; // 20 segundos con 100ms de intervalo
+            const maxChecks = 300; // 30 segundos con 100ms de intervalo
             
             const checkForSuccess = async () => {
               checkCount++;
               
               const text = document.body.innerText || '';
+              const html = document.body.innerHTML || '';
+              
+              // Búsqueda más amplia de mensajes de éxito
               const hasSuccessText = text.toLowerCase().includes('guardado') || 
                                      text.toLowerCase().includes('exitoso') || 
                                      text.toLowerCase().includes('completado') ||
                                      text.toLowerCase().includes('éxito') ||
                                      text.toLowerCase().includes('exito') ||
-                                     text.toLowerCase().includes('success');
+                                     text.toLowerCase().includes('success') ||
+                                     text.toLowerCase().includes('ok') ||
+                                     text.toLowerCase().includes('aceptado') ||
+                                     text.toLowerCase().includes('registrado') ||
+                                     text.toLowerCase().includes('enviado');
               
-              const hasSwal = !!document.querySelector('.swal2-popup, .swal2-success, .swal2-title, .swal-modal');
-              const hasAlert = !!document.querySelector('.alert-success, .toast-success, .alert, [role="alert"]');
-              const hasModal = !!document.querySelector('.modal.show, .modal.in, [role="dialog"]');
+              // Búsqueda de modales y alertas
+              const hasSwal = !!document.querySelector('.swal2-popup, .swal2-success, .swal2-title, .swal-modal, .swal2-confirm');
+              const hasAlert = !!document.querySelector('.alert-success, .toast-success, .alert, [role="alert"], .success, .notification-success');
+              const hasModal = !!document.querySelector('.modal.show, .modal.in, [role="dialog"], .modal-open');
               
-              if (hasSuccessText || hasSwal || hasAlert || hasModal) {
+              // Búsqueda de cambios en URL
+              const urlChanged = window.location.href.includes('success') || window.location.href.includes('completado') || window.location.href.includes('exito');
+              
+              // Búsqueda de elementos con clase success
+              const hasSuccessClass = !!document.querySelector('[class*="success"], [class*="exito"], [class*="completado"]');
+              
+              if (hasSuccessText || hasSwal || hasAlert || hasModal || urlChanged || hasSuccessClass) {
                 resolve(true);
               } else if (checkCount >= maxChecks) {
                 resolve(false);
@@ -239,20 +280,23 @@ async function processUser(user) {
 
         if (screenshotTaken) {
           successFound = true;
-          console.log(`  [${user.nombre}] ✅ Mensaje de éxito detectado. Tomando captura INMEDIATA...`);
+          console.log(`  [${user.nombre}] ✅ Confirmación detectada. Tomando captura INMEDIATA...`);
           
-          // Tomar foto INMEDIATAMENTE sin esperar
+          // Esperar un poco para que se estabilice
+          await sleep(500);
+          
+          // Tomar foto INMEDIATAMENTE
           await page.screenshot({ path: shot, fullPage: true });
-          console.log(`  [${user.nombre}] 📸 Captura tomada en el INSTANTE exacto del éxito.`);
+          console.log(`  [${user.nombre}] 📸 Captura tomada en el INSTANTE exacto.`);
         } else {
-          throw new Error('No se detectó mensaje de éxito');
+          throw new Error('No se detectó confirmación después de 30 segundos');
         }
         
       } catch (e) {
-        console.log(`  [${user.nombre}] ⏱️ No se detectó confirmación, tomando captura de respaldo...`);
+        console.log(`  [${user.nombre}] ⏱️ Timeout esperando confirmación, tomando captura de respaldo...`);
         
         // Tomar captura de respaldo después de esperar
-        await sleep(2000);
+        await sleep(3000);
         await page.screenshot({ path: shot, fullPage: true });
         console.log(`  [${user.nombre}] 📸 Captura de respaldo tomada.`);
       }
