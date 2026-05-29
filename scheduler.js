@@ -50,7 +50,7 @@ async function checkIfExecutedToday() {
   return false;
 }
 
-// Función para ejecutar el worker con verificación
+// Función para ejecutar el worker SOLO para daveymena16@gmail.com
 async function executeWorkerIfNeeded() {
   const alreadyExecuted = await checkIfExecutedToday();
   
@@ -60,17 +60,44 @@ async function executeWorkerIfNeeded() {
     return;
   }
   
-  logToFile('🚀 Iniciando ejecución del preoperacional...');
-  console.log('🚀 Iniciando ejecución del preoperacional...');
+  logToFile('🚀 Iniciando ejecución del preoperacional para daveymena16@gmail.com...');
+  console.log('🚀 Iniciando ejecución del preoperacional para daveymena16@gmail.com...');
   
   try {
-    await startWorker();
+    // Obtener solo el usuario daveymena16@gmail.com
+    const user = await get(`SELECT * FROM users WHERE email = 'daveymena16@gmail.com' LIMIT 1`);
+    
+    if (!user) {
+      const msgNoUser = '⚠️ Usuario daveymena16@gmail.com no encontrado en la base de datos.';
+      logToFile(msgNoUser);
+      console.warn(msgNoUser);
+      return;
+    }
+    
+    if (user.active !== 1) {
+      const msgInactive = `⚠️ Usuario ${user.nombre} está inactivo. Activando...`;
+      logToFile(msgInactive);
+      console.log(msgInactive);
+      
+      // Reactivar por 5 días
+      const now = new Date();
+      const fiveDaysLater = new Date(now.getTime() + (5 * 24 * 60 * 60 * 1000));
+      await run(
+        `UPDATE users SET subscription_status = 'active', active = 1, subscription_until = ? WHERE id = ?`,
+        [fiveDaysLater.toISOString(), user.id]
+      );
+    }
+    
+    // Importar processUserImproved para ejecutar solo este usuario
+    const { processUserImproved } = require('./lib/process-user-improved');
+    await processUserImproved(user);
+    
     const today = new Date().toISOString().split('T')[0];
     lastExecutionDate = today;
     executedToday = true;
     lastExecutionError = null;
-    logToFile('✅ Ejecución completada exitosamente.');
-    console.log('✅ Ejecución completada exitosamente.');
+    logToFile('✅ Ejecución completada exitosamente para daveymena16@gmail.com.');
+    console.log('✅ Ejecución completada exitosamente para daveymena16@gmail.com.');
   } catch (error) {
     lastExecutionError = error.message;
     logToFile(`❌ Error durante la ejecución: ${error.message}`);
