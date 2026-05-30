@@ -1,0 +1,55 @@
+# EasyPanel Configuration for Preoperacional Nova
+# Deploy: https://easypanel.io
+
+services:
+  preoperacional-nova:
+    image: node:18-alpine
+    source:
+      type: git
+      repo: https://github.com/daveymena/preoperatorio-nova.git
+      branch: main
+      path: preoperacional-saas
+    
+    build:
+      dockerfile: Dockerfile
+      context: .
+    
+    ports:
+      - 3000:3000
+    
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://postgres:6715320Dvd.@tecnology_exnoba-db:5432/exnova?sslmode=disable
+      - NEXT_PUBLIC_API_URL=https://preoperacional.conectartv.com
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    
+    volumes:
+      - /app/logs:/app/logs
+      - /app/.next:/app/.next
+    
+    healthCheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      startPeriod: 40s
+    
+    restart: always
+    
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=6715320Dvd.
+      - POSTGRES_DB=exnova
+    
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    
+    restart: always
+
+volumes:
+  postgres_data:
