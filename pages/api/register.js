@@ -8,7 +8,8 @@ export default async function handler(req, res) {
 
   const {
     cedula, nombre, placa, email, password, supervisor,
-    km_actual, vacaciones_inicio, vacaciones_fin
+    km_actual, telefono, direccion, ciudad, departamento,
+    empresa, cargo, vacaciones_inicio, vacaciones_fin
   } = req.body;
 
   if (!cedula || !nombre || !placa || !password || !email) {
@@ -25,12 +26,12 @@ export default async function handler(req, res) {
     }
 
     const result = await run(`
-      INSERT INTO users (cedula, nombre, placa, email, password, supervisor, km_actual, vacaciones_inicio, vacaciones_fin, trial_start, subscription_status, subscription_until, active)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'trial', ?, 1)
-    `, [cedula, nombre, placa, email, password, supervisor || 'eduardo Villareal', km_actual || 0, vacaciones_inicio || null, vacaciones_fin || null, trialStart, trialEnd]);
+      INSERT INTO users (cedula, nombre, placa, email, password, supervisor, km_actual, telefono, direccion, ciudad, departamento, empresa, cargo, vacaciones_inicio, vacaciones_fin, trial_start, subscription_status, subscription_until, active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'trial', ?, 1)
+    `, [cedula, nombre, placa, email, password, supervisor || 'Eduardo Villareal', km_actual || 0, telefono || null, direccion || null, ciudad || null, departamento || null, empresa || null, cargo || null, vacaciones_inicio || null, vacaciones_fin || null, trialStart, trialEnd]);
 
     // Enviar correo de bienvenida
-    const user = { nombre, placa, cedula, email, supervisor: supervisor || 'eduardo Villareal' };
+    const user = { nombre, placa, cedula, email, supervisor: supervisor || 'Eduardo Villareal', telefono, direccion, ciudad, departamento, empresa, cargo };
     sendWelcomeEmail(user, trialEnd).catch(e => console.error('Error enviando bienvenida:', e.message));
 
     res.status(201).json({

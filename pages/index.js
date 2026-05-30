@@ -10,8 +10,14 @@ export default function Home() {
     placa: '',
     email: '',
     password: '',
-    supervisor: 'eduardo Villareal',
+    supervisor: 'Eduardo Villareal',
     km_actual: '',
+    telefono: '',
+    direccion: 'Calle Principal 123',
+    ciudad: 'Bogotá',
+    departamento: 'Cundinamarca',
+    empresa: 'Conectar TV',
+    cargo: 'Conductor',
     vacaciones_inicio: '',
     vacaciones_fin: ''
   });
@@ -186,6 +192,37 @@ export default function Home() {
               <div className="form-group">
                 <label>Kilometraje Actual (aprox.)</label>
                 <input type="number" value={formData.km_actual} onChange={e => set('km_actual', e.target.value)} placeholder="Ej: 12500" />
+              </div>
+            </div>
+
+            {/* Información Adicional */}
+            <p style={{ fontSize: '0.8rem', color: '#38bdf8', marginBottom: '1rem', marginTop: '1.5rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: '700' }}>
+              Información Adicional
+            </p>
+            <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+              <div className="form-group">
+                <label>Teléfono / Celular</label>
+                <input type="tel" value={formData.telefono} onChange={e => set('telefono', e.target.value)} placeholder="Ej: 3001234567" />
+              </div>
+              <div className="form-group">
+                <label>Empresa</label>
+                <input type="text" value={formData.empresa} onChange={e => set('empresa', e.target.value)} placeholder="Conectar TV" />
+              </div>
+              <div className="form-group">
+                <label>Cargo</label>
+                <input type="text" value={formData.cargo} onChange={e => set('cargo', e.target.value)} placeholder="Conductor" />
+              </div>
+              <div className="form-group">
+                <label>Dirección</label>
+                <input type="text" value={formData.direccion} onChange={e => set('direccion', e.target.value)} placeholder="Calle Principal 123" />
+              </div>
+              <div className="form-group">
+                <label>Ciudad</label>
+                <input type="text" value={formData.ciudad} onChange={e => set('ciudad', e.target.value)} placeholder="Bogotá" />
+              </div>
+              <div className="form-group">
+                <label>Departamento</label>
+                <input type="text" value={formData.departamento} onChange={e => set('departamento', e.target.value)} placeholder="Cundinamarca" />
               </div>
             </div>
 

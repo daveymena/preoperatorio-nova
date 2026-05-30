@@ -9,7 +9,7 @@
  */
 
 const { processUserImproved } = require('./lib/process-user-improved');
-const { run } = require('./lib/db');
+const { get } = require('./lib/db');
 const fs = require('fs');
 
 async function runTest() {
@@ -19,12 +19,7 @@ async function runTest() {
 
   try {
     // Obtener usuario de prueba
-    const user = await new Promise((resolve, reject) => {
-      run('SELECT * FROM users WHERE email = ?', ['daveymena16@gmail.com'], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    const user = await get('SELECT * FROM users WHERE email = ?', ['daveymena16@gmail.com']);
 
     if (!user) {
       console.error('❌ Usuario no encontrado: daveymena16@gmail.com');
