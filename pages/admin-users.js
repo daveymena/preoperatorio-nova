@@ -10,10 +10,22 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
   const [message, setMessage] = useState('');
+  const [dbInfo, setDbInfo] = useState(null);
 
   useEffect(() => {
+    loadDBInfo();
     loadUsers();
   }, []);
+
+  const loadDBInfo = async () => {
+    try {
+      const response = await fetch('/api/check-db');
+      const data = await response.json();
+      setDbInfo(data.database);
+    } catch (error) {
+      console.error('Error cargando info de BD:', error);
+    }
+  };
 
   const loadUsers = async () => {
     try {
@@ -61,6 +73,50 @@ export default function AdminUsers() {
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       <h1>👥 Administración de Usuarios</h1>
       
+      {/* Información de la Base de Datos */}
+      {dbInfo && (
+        <div style={{
+          marginBottom: '20px',
+          padding: '15px',
+          backgroundColor: dbInfo.connected ? '#d4edda' : '#f8d7da',
+          border: `1px solid ${dbInfo.connected ? '#c3e6cb' : '#f5c6cb'}`,
+          borderRadius: '5px'
+        }}>
+          <h3 style={{ margin: '0 0 10px 0' }}>
+            {dbInfo.connected ? '✅ Base de Datos Conectada' : '❌ Base de Datos No Conectada'}
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+            <div>
+              <strong>Tipo:</strong> {dbInfo.type}
+            </div>
+            <div>
+              <strong>URL:</strong> {dbInfo.url}
+            </div>
+            <div>
+              <strong>Usuarios:</strong> {dbInfo.userCount}
+            </div>
+            <div>
+              <strong>Tablas:</strong> {dbInfo.tables?.length || 0}
+            </div>
+          </div>
+          {dbInfo.tables && dbInfo.tables.length > 0 && (
+            <div style={{ marginTop: '10px' }}>
+              <strong>Tablas disponibles:</strong> {dbInfo.tables.join(', ')}
+            </div>
+          )}
+          {dbInfo.sampleUser && (
+            <div style={{ marginTop: '10px' }}>
+              <strong>Primer usuario:</strong> {dbInfo.sampleUser.nombre} ({dbInfo.sampleUser.email})
+            </div>
+          )}
+          {dbInfo.error && (
+            <div style={{ marginTop: '10px', color: '#721c24' }}>
+              <strong>Error:</strong> {dbInfo.error}
+            </div>
+          )}
+        </div>
+      )}
+      
       <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f0f0f0', borderRadius: '5px' }}>
         <p style={{ margin: '0 0 10px 0', fontWeight: 'bold' }}>Acciones:</p>
         <button
@@ -81,7 +137,7 @@ export default function AdminUsers() {
         </button>
         
         <button
-          onClick={loadUsers}
+          onClick={() => { loadDBInfo(); loadUsers(); }}
           disabled={loading}
           style={{
             padding: '10px 20px',
@@ -93,7 +149,7 @@ export default function AdminUsers() {
             opacity: loading ? 0.6 : 1
           }}
         >
-          {loading ? '⏳ Cargando...' : '🔄 Recargar Lista'}
+          {loading ? '⏳ Cargando...' : '🔄 Recargar Todo'}
         </button>
       </div>
 
