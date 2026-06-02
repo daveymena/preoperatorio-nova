@@ -1,5 +1,5 @@
 const { get } = require('./lib/db');
-const { processUser } = require('./worker');
+const { processUserImproved } = require('./lib/process-user-improved');
 
 async function runDavey() {
   try {
@@ -14,9 +14,9 @@ async function runDavey() {
     console.log(`✅ Usuario encontrado: ${user.nombre}`);
     console.log(`📧 Email: ${user.email}`);
     console.log(`🚗 Placa: ${user.placa}`);
-    console.log('\n🚀 Iniciando proceso de preoperacional...\n');
+    console.log('\n🚀 Iniciando proceso de preoperacional con versión MEJORADA...\n');
 
-    await processUser(user);
+    await processUserImproved(user);
 
     console.log('\n✅ Proceso completado exitosamente');
   } catch (error) {

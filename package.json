@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@swc/helpers": "^0.5.21",
+    "dotenv": "^17.4.2",
+    "g4f": "latest",
     "lucide-react": "^0.300.0",
     "mercadopago": "^2.12.0",
     "next": "latest",
@@ -28,8 +30,7 @@
     "puppeteer": "^22.0.0",
     "react": "latest",
     "react-dom": "latest",
-    "sqlite3": "^5.1.0",
-    "g4f": "latest"
+    "sqlite3": "^5.1.0"
   },
   "devDependencies": {
     "browserslist": "^4.28.2",
