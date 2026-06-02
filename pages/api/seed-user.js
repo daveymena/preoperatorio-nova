@@ -35,9 +35,9 @@ export default async function handler(req, res) {
     // Insertar usuario de Davey
     console.log('📝 Insertando usuario de Davey...');
 
-    // Calcular fecha de expiración (30 días)
+    // Calcular fecha de expiración (10 años = permanente)
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 30);
+    expiryDate.setFullYear(expiryDate.getFullYear() + 10);
 
     const result = await run(
       `INSERT INTO users (
@@ -65,8 +65,8 @@ export default async function handler(req, res) {
         1, // active
         new Date().toISOString(),
         new Date().toISOString(),
-        'active',
-        expiryDate.toISOString(),
+        'premium', // PREMIUM - No expira nunca
+        expiryDate.toISOString(), // 10 años = permanente
         new Date().toISOString()
       ]
     );

@@ -55,8 +55,8 @@ async function seedUsers() {
         1, // active
         new Date().toISOString(),
         new Date().toISOString(),
-        'active',
-        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 días de suscripción
+        'premium', // PREMIUM - No expira nunca
+        new Date(Date.now() + 365 * 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 años = permanente
         new Date().toISOString()
       ]
     );
@@ -68,7 +68,7 @@ async function seedUsers() {
     console.log(`   Cédula: 1077449318`);
     console.log(`   KM Actual: 532`);
     console.log(`   Estado: Activo`);
-    console.log(`   Suscripción hasta: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}`);
+    console.log(`   Suscripción: PREMIUM (Permanente - 10 años)`);
   } catch (error) {
     console.error('❌ Error insertando usuario:', error.message);
     // No lanzar error para que la aplicación continúe

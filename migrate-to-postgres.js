@@ -164,13 +164,13 @@ async function migrate() {
           1,
           new Date().toISOString(),
           new Date().toISOString(),
-          'active',
-          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          'premium', // PREMIUM - No expira nunca
+          new Date(Date.now() + 365 * 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 años = permanente
           new Date().toISOString()
         ]
       );
       
-      console.log('✅ Usuario de Davey insertado exitosamente');
+      console.log('✅ Usuario de Davey insertado exitosamente (PREMIUM PERMANENTE)');
     }
 
     console.log('\n✅ MIGRACIÓN COMPLETADA EXITOSAMENTE');
