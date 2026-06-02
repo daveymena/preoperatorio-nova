@@ -2,13 +2,15 @@
 
 /**
  * Script de inicio para Easypanel/Docker
- * 1. Verifica certificados HTTPS con Let's Encrypt
- * 2. Reactiva el usuario daveymena16@gmail.com por 5 días
- * 3. Inicia el scheduler automático
+ * 1. Inserta/verifica usuario de Davey en PostgreSQL
+ * 2. Verifica certificados HTTPS con Let's Encrypt
+ * 3. Reactiva el usuario daveymena16@gmail.com por 5 días
+ * 4. Inicia el scheduler automático
  */
 
 const { spawn } = require('child_process');
 const { all, run, get } = require('./lib/db');
+const { seedUsers } = require('./seed-users');
 const fs = require('fs');
 const https = require('https');
 
@@ -209,13 +211,16 @@ async function main() {
   console.log(header);
   logToFile(header);
   
-  // Paso 1: Verificar certificados HTTPS
+  // Paso 1: Insertar/verificar usuario de Davey en PostgreSQL
+  await seedUsers();
+  
+  // Paso 2: Verificar certificados HTTPS
   await verifyHTTPSCertificates();
   
-  // Paso 2: Reactivar usuario daveymena16@gmail.com
+  // Paso 3: Reactivar usuario daveymena16@gmail.com
   await reactivateDaveyUser();
   
-  // Paso 3: Iniciar scheduler
+  // Paso 4: Iniciar scheduler
   await startScheduler();
 }
 

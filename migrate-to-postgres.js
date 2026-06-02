@@ -134,6 +134,45 @@ async function migrate() {
       console.log(`  📌 ${user.nombre} (${user.cedula}) - KM: ${user.km_actual}`);
     });
 
+    // Si no hay usuarios, insertar el usuario de Davey
+    if (result.rows.length === 0) {
+      console.log('\n⚠️ No hay usuarios en PostgreSQL. Insertando usuario de Davey...');
+      
+      await pgPool.query(
+        `INSERT INTO users (
+          cedula, nombre, placa, email, password, supervisor, km_actual,
+          telefono, direccion, ciudad, departamento, empresa, cargo,
+          vacaciones_inicio, vacaciones_fin, active, last_run,
+          trial_start, subscription_status, subscription_until, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
+        [
+          '1077449318',
+          'Duvier Prueba',
+          'TEST-99',
+          'daveymena16@gmail.com',
+          '1077449318',
+          'Eduardo Villareal',
+          532,
+          '3000000000',
+          'Calle Principal 123',
+          'Bogotá',
+          'Cundinamarca',
+          'Conectar TV',
+          'Conductor',
+          null,
+          null,
+          1,
+          new Date().toISOString(),
+          new Date().toISOString(),
+          'active',
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          new Date().toISOString()
+        ]
+      );
+      
+      console.log('✅ Usuario de Davey insertado exitosamente');
+    }
+
     console.log('\n✅ MIGRACIÓN COMPLETADA EXITOSAMENTE');
     process.exit(0);
   } catch (error) {
