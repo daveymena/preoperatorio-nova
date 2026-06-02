@@ -1,6 +1,6 @@
 const cron = require('node-cron');
-const { startWorker } = require('./worker');
 const { get, run } = require('./lib/db');
+const { processUserImproved } = require('./lib/process-user-improved');
 const fs = require('fs');
 
 // Variable para rastrear si ya se ejecutó hoy
@@ -88,8 +88,7 @@ async function executeWorkerIfNeeded() {
       );
     }
     
-    // Importar processUserImproved para ejecutar solo este usuario
-    const { processUserImproved } = require('./lib/process-user-improved');
+    // Importar y ejecutar para solo este usuario
     await processUserImproved(user);
     
     const today = new Date().toISOString().split('T')[0];
