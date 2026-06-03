@@ -21,7 +21,7 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgres://postgres:6715320Dvd.@tecnology_exnoba-db:5432/exnova?sslmode=disable
       - NEXT_PUBLIC_API_URL=https://preoperacional.conectartv.com
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     
     volumes:
       - /app/logs:/app/logs
