@@ -156,49 +156,72 @@ async function reactivateDaveyUser() {
   }
 }
 
+let schedulerProcess = null;
+let restartCount = 0;
+const MAX_RESTART_DELAY = 60000; // 1 min max between restarts
+
 async function startScheduler() {
   const msg = '🚀 Iniciando scheduler...\n';
   console.log(msg);
   logToFile(msg);
-  
-  // Iniciar el scheduler como proceso hijo
-  const scheduler = spawn('node', ['scheduler.js'], {
-    stdio: 'inherit',
-    cwd: __dirname,
-    env: {
-      ...process.env,
-      NODE_ENV: 'production',
-      TZ: 'America/Bogota'
-    }
-  });
-  
-  scheduler.on('error', (error) => {
-    const errorMsg = `❌ Error iniciando scheduler: ${error.message}`;
-    console.error(errorMsg);
-    logToFile(errorMsg);
-    process.exit(1);
-  });
-  
-  scheduler.on('exit', (code) => {
-    const exitMsg = `⚠️ Scheduler terminó con código ${code}`;
-    console.log(exitMsg);
-    logToFile(exitMsg);
-    process.exit(code);
-  });
+
+  const spawnScheduler = () => {
+    schedulerProcess = spawn('node', ['scheduler.js'], {
+      stdio: 'inherit',
+      cwd: __dirname,
+      env: {
+        ...process.env,
+        NODE_ENV: 'production',
+        TZ: 'America/Bogota'
+      }
+    });
+
+    schedulerProcess.on('error', (error) => {
+      const errorMsg = `❌ Error iniciando scheduler: ${error.message}`;
+      console.error(errorMsg);
+      logToFile(errorMsg);
+      scheduleRestart();
+    });
+
+    schedulerProcess.on('exit', (code, signal) => {
+      if (signal === 'SIGTERM' || signal === 'SIGINT') {
+        const exitMsg = `🛑 Scheduler terminado por señal ${signal}`;
+        console.log(exitMsg);
+        logToFile(exitMsg);
+        process.exit(0);
+        return;
+      }
+      const exitMsg = `⚠️ Scheduler terminó con código ${code}. Reintentando en ${Math.min(1000 * (restartCount + 1), MAX_RESTART_DELAY)}ms...`;
+      console.warn(exitMsg);
+      logToFile(exitMsg);
+      scheduleRestart();
+    });
+  };
+
+  const scheduleRestart = () => {
+    restartCount++;
+    const delay = Math.min(1000 * restartCount, MAX_RESTART_DELAY);
+    const restartMsg = `🔄 Reintento #${restartCount} en ${delay}ms...`;
+    console.log(restartMsg);
+    logToFile(restartMsg);
+    setTimeout(spawnScheduler, delay);
+  };
+
+  spawnScheduler();
   
   // Manejar señales de terminación
   process.on('SIGTERM', () => {
     const msg = '📡 Recibida señal SIGTERM, cerrando...';
     console.log(msg);
     logToFile(msg);
-    scheduler.kill('SIGTERM');
+    if (schedulerProcess) schedulerProcess.kill('SIGTERM');
   });
   
   process.on('SIGINT', () => {
     const msg = '📡 Recibida señal SIGINT, cerrando...';
     console.log(msg);
     logToFile(msg);
-    scheduler.kill('SIGINT');
+    if (schedulerProcess) schedulerProcess.kill('SIGINT');
   });
 }
 

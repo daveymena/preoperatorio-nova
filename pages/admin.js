@@ -1,6 +1,6 @@
 import Head from 'next/head';
-import { Play, Trash2, Loader2, CheckCircle2, XCircle, RefreshCw, Crown, Users, RotateCcw } from 'lucide-react';
-import { useState } from 'react';
+import { Play, Trash2, Loader2, CheckCircle2, XCircle, RefreshCw, Crown, Users, RotateCcw, Activity, CalendarCheck } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 
 export async function getServerSideProps() {
@@ -34,6 +34,27 @@ export default function Admin({ users }) {
   const router = useRouter();
   const [processingId, setProcessingId] = useState(null);
   const [status, setStatus] = useState({ type: '', message: '' });
+  const [sysStatus, setSysStatus] = useState(null);
+  const [loadingStatus, setLoadingStatus] = useState(false);
+
+  const fetchSystemStatus = useCallback(async () => {
+    setLoadingStatus(true);
+    try {
+      const [sysRes, dailyRes] = await Promise.all([
+        fetch('/api/system-status'),
+        fetch('/api/daily-execution-status')
+      ]);
+      const sysData = await sysRes.json();
+      const dailyData = await dailyRes.json();
+      setSysStatus({ ...sysData, daily: dailyData });
+    } catch {
+      setSysStatus(null);
+    } finally {
+      setLoadingStatus(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchSystemStatus(); }, [fetchSystemStatus]);
 
   const runUser = async (id) => {
     if (processingId) return;
@@ -162,6 +183,88 @@ export default function Admin({ users }) {
             <div style={{ color: '#94a3b8', fontSize: '0.85rem' }}>{s.label}</div>
           </div>
         ))}
+      </div>
+
+      {/* System Status */}
+      <div className="glass-card" style={{ marginBottom: '2rem', padding: '1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#f8fafc', margin: 0 }}>
+            <Activity size={18} /> Estado del Sistema
+          </h2>
+          <button onClick={fetchSystemStatus} disabled={loadingStatus} style={{ background: '#1e293b', border: '1px solid #334155', color: '#94a3b8', padding: '0.4rem 0.8rem', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem' }}>
+            <RefreshCw size={14} className={loadingStatus ? 'animate-spin' : ''} /> {loadingStatus ? 'Verificando...' : 'Actualizar'}
+          </button>
+        </div>
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }}>
+          {/* Scheduler */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.35rem', textTransform: 'uppercase', fontWeight: '600' }}>Scheduler</div>
+            {sysStatus ? (
+              <>
+                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: sysStatus.scheduler === 'ok' ? '#22c55e' : '#ef4444' }}>
+                  {sysStatus.scheduler === 'ok' ? '🟢 Activo' : '🔴 Detenido'}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.25rem' }}>
+                  {sysStatus.scheduler === 'ok' ? 'Ejecutando' : 'No responde'}
+                </div>
+              </>
+            ) : <Loader2 size={16} className="animate-spin" style={{ margin: '0.5rem auto', color: '#64748b' }} />}
+          </div>
+          {/* Today's Execution */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.35rem', textTransform: 'uppercase', fontWeight: '600' }}>Ejecución Hoy</div>
+            {sysStatus ? (
+              (() => {
+                const today = new Date().toISOString().split('T')[0];
+                const lastRun = sysStatus.lastExecution ? sysStatus.lastExecution.split('T')[0] : null;
+                const doneToday = lastRun === today;
+                return (
+                  <>
+                    <div style={{ fontSize: '0.8rem', fontWeight: '700', color: doneToday ? '#22c55e' : '#fbbf24' }}>
+                      {doneToday ? '✅ Completado' : '⏳ Pendiente'}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.25rem' }}>
+                      {sysStatus.lastExecution ? new Date(sysStatus.lastExecution).toLocaleString('es-CO', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                    </div>
+                  </>
+                );
+              })()
+            ) : <Loader2 size={16} className="animate-spin" style={{ margin: '0.5rem auto', color: '#64748b' }} />}
+          </div>
+          {/* DB */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.35rem', textTransform: 'uppercase', fontWeight: '600' }}>Base de Datos</div>
+            {sysStatus ? (
+              <div style={{ fontSize: '0.8rem', fontWeight: '700', color: sysStatus.database === 'ok' ? '#22c55e' : '#ef4444' }}>
+                {sysStatus.database === 'ok' ? '🟢 Conectada' : '🔴 Desconectada'}
+              </div>
+            ) : <Loader2 size={16} className="animate-spin" style={{ margin: '0.5rem auto', color: '#64748b' }} />}
+          </div>
+          {/* Users */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.35rem', textTransform: 'uppercase', fontWeight: '600' }}>Usuarios</div>
+            {sysStatus ? (
+              <>
+                <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#38bdf8' }}>{sysStatus.usersTotal || 0}</div>
+                <div style={{ fontSize: '0.7rem', color: '#22c55e' }}>{sysStatus.usersActive || 0} activos</div>
+              </>
+            ) : <Loader2 size={16} className="animate-spin" style={{ margin: '0.5rem auto', color: '#64748b' }} />}
+          </div>
+          {/* Last Execution Details */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', padding: '1rem', textAlign: 'center', gridColumn: 'span 2' }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.35rem', textTransform: 'uppercase', fontWeight: '600' }}>Próxima Ejecución</div>
+            {sysStatus ? (
+              <>
+                <div style={{ fontSize: '0.8rem', fontWeight: '700', color: '#94a3b8' }}>
+                  {sysStatus.nextExecution ? new Date(sysStatus.nextExecution).toLocaleString('es-CO', { weekday: 'long', hour: '2-digit', minute: '2-digit' }) : '—'}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.25rem' }}>
+                  Ventana: 6:00 AM - 12:00 PM (Colombia)
+                </div>
+              </>
+            ) : <Loader2 size={16} className="animate-spin" style={{ margin: '0.5rem auto', color: '#64748b' }} />}
+          </div>
+        </div>
       </div>
 
       {status.message && (
