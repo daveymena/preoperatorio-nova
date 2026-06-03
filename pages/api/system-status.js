@@ -23,9 +23,7 @@ export default async function handler(req, res) {
       const schedulerLog = `${logsDir}/scheduler.log`;
       if (fs.existsSync(schedulerLog)) {
         const content = fs.readFileSync(schedulerLog, 'utf8');
-        const lines = content.split('\n');
-        const lastLine = lines[lines.length - 2]; // Última línea no vacía
-        if (lastLine && lastLine.includes('Scheduler activo')) {
+        if (content.includes('Scheduler activo')) {
           scheduler = 'ok';
         }
       }
