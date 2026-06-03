@@ -148,6 +148,7 @@ cron.schedule('0 * * * *', () => {
 const startupTime = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
 const initMsg = `
 ═══════════════════════════════════════════════════════════
+📡 [Heartbeat] Scheduler activo | ${startupTime} | ⏳ Pendiente
 📅 SCHEDULER DE PREOPERACIONALES ACTIVO
 ═══════════════════════════════════════════════════════════
 ⏰ Ventana de ejecución: 6:00 AM - 12:00 PM (Colombia)
