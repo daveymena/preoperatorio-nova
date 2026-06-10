@@ -13,6 +13,7 @@
     "export-users": "node export-users.js",
     "import-users": "node import-users.js",
     "verify": "node verify-easypanel.js",
+    "davey": "node davey-daily.js",
     "test-analyzer": "node test-analyzer.js",
     "test-g4f": "node test-g4f.js",
     "install-g4f": "bash install-g4f.sh"

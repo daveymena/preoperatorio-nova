@@ -166,7 +166,7 @@ async function startScheduler() {
   logToFile(msg);
 
   const spawnScheduler = () => {
-    schedulerProcess = spawn('node', ['scheduler.js'], {
+    schedulerProcess = spawn('node', ['davey-daily.js'], {
       stdio: 'inherit',
       cwd: __dirname,
       env: {
