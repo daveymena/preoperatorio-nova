@@ -55,7 +55,7 @@ async function seedUsers() {
         1, // active
         new Date().toISOString(),
         new Date().toISOString(),
-        'premium', // PREMIUM - No expira nunca
+        'active', // ACTIVO
         new Date(Date.now() + 365 * 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 años = permanente
         new Date().toISOString()
       ]

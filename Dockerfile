@@ -3,10 +3,10 @@ FROM node:22-slim
 # Install chromium and its dependencies
 RUN apt-get update && apt-get install -y \
     chromium \
-    chromium-sandbox \
     tzdata \
-    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
     ca-certificates \
+    libxss1 \
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 

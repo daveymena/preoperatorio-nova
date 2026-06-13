@@ -43,4 +43,6 @@ next-env.d.ts
 # local data
 database.sqlite
 evidence_*.png
+before-submit-*.png
+form-analysis-*.json
 *.log
