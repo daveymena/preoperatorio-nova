@@ -46,7 +46,7 @@ cleanup() {
 }
 
 # Configurar traps para señales
-trap cleanup SIGTERM SIGINT
+trap cleanup TERM INT
 
 # Mantener el script corriendo
 wait
