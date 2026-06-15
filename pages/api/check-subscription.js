@@ -27,9 +27,13 @@ export default async function handler(req, res) {
       daysLeft = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
     }
 
+    // Duvier siempre gratis
+    const esDuvier = user.cedula === '1077449318';
     const status = user.subscription_status;
     let state;
-    if (status === 'active') {
+    if (esDuvier) {
+      state = 'active';
+    } else if (status === 'active') {
       if (trialEnd && trialEnd < now) {
         state = 'expired';
       } else {

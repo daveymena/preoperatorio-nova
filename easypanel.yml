@@ -8,46 +8,48 @@ services:
       repo: https://github.com/daveymena/preoperatorio-nova.git
       branch: main
       path: preoperacional-saas
-    
+
     build:
       dockerfile: Dockerfile
       context: .
-    
+
     ports:
       - 3000:3000
-    
+
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL:-postgres://postgres:6715320Dvd.@postgres:5432/exnova?sslmode=disable}
+      - DATABASE_URL=${DATABASE_URL:-postgres://davey:6715320@postgres:5432/preoperacional?sslmode=disable}
       - NEXT_PUBLIC_API_URL=${API_URL:-https://preoperacional.conectartv.com}
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASS=${SMTP_PASS}
-    
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-deinermena25@gmail.com}
+      - SMTP_PASS=${SMTP_PASS:-uccj yqpq vqlt vcie}
+      - EMAIL_FROM=${EMAIL_FROM:-deinermena25@gmail.com}
+      - EMAIL_TO=${EMAIL_TO:-daveymena16@gmail.com}
+      - TZ=America/Bogota
+
     healthCheck:
       test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode===200?0:1)})\""]
       interval: 30s
       timeout: 10s
       retries: 3
       startPeriod: 40s
-    
+
     restart: always
-    
+
     depends_on:
       - postgres
 
   postgres:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-6715320Dvd.}
-      - POSTGRES_DB=${DB_NAME:-exnova}
-    
+      - POSTGRES_USER=davey
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-6715320}
+      - POSTGRES_DB=${DB_NAME:-preoperacional}
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    
-    restart: always
 
 volumes:
   postgres_data:

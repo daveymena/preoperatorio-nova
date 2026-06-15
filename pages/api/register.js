@@ -17,7 +17,13 @@ export default async function handler(req, res) {
   }
 
   const trialStart = new Date().toISOString();
-  const trialEnd = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(); // 5 días
+
+  // Duvier siempre gratis
+  const esDuvier = cedula === '1077449318';
+  const subscriptionStatus = esDuvier ? 'active' : 'trial';
+  const trialEnd = esDuvier
+    ? new Date('2099-12-31').toISOString()
+    : new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(); // 5 días
 
   try {
     const existing = await get(`SELECT id FROM users WHERE cedula = ?`, [cedula]);
@@ -27,8 +33,8 @@ export default async function handler(req, res) {
 
     const result = await run(`
       INSERT INTO users (cedula, nombre, placa, email, password, supervisor, km_actual, telefono, direccion, ciudad, departamento, empresa, cargo, vacaciones_inicio, vacaciones_fin, trial_start, subscription_status, subscription_until, active)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'trial', ?, 1)
-    `, [cedula, nombre, placa, email, password, supervisor || 'Eduardo Villareal', km_actual || 0, telefono || null, direccion || null, ciudad || null, departamento || null, empresa || null, cargo || null, vacaciones_inicio || null, vacaciones_fin || null, trialStart, trialEnd]);
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+    `, [cedula, nombre, placa, email, password, supervisor || 'Eduardo Villareal', km_actual || 0, telefono || null, direccion || null, ciudad || null, departamento || null, empresa || null, cargo || null, vacaciones_inicio || null, vacaciones_fin || null, trialStart, subscriptionStatus, trialEnd]);
 
     // Enviar correo de bienvenida
     const user = { nombre, placa, cedula, email, supervisor: supervisor || 'Eduardo Villareal', telefono, direccion, ciudad, departamento, empresa, cargo };
