@@ -1,7 +1,7 @@
 ﻿const cron = require('node-cron');
 
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env.production') });
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { get, run } = require('./lib/db');
 const { processUserImproved } = require('./lib/process-user-improved');
 const fs = require('fs');

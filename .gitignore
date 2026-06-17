@@ -46,3 +46,13 @@ evidence_*.png
 before-submit-*.png
 form-analysis-*.json
 *.log
+
+# Test/temp files
+_seed.js
+_test_run.js
+ck_pwd.cjs
+temp_test.js
+test-db-*.js
+verify_db.js
+*.backup
+*.backup2
