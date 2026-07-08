@@ -8,6 +8,15 @@ let executedToday = false;
 let lastExecutionDate = null;
 let lastExecutionError = null;
 
+function colombiaDateKey(date = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date);
+}
+
 // Crear directorio de logs si no existe
 const logsDir = process.env.NODE_ENV === 'production' ? '/app/logs' : './logs';
 if (!fs.existsSync(logsDir)) {
@@ -27,7 +36,7 @@ function logToFile(message) {
 
 // Función para verificar si ya se ejecutó hoy
 async function checkIfExecutedToday() {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const today = colombiaDateKey();
   
   if (lastExecutionDate === today) {
     return true;
@@ -37,7 +46,7 @@ async function checkIfExecutedToday() {
   try {
     const result = await get(`SELECT last_run FROM users WHERE last_run IS NOT NULL ORDER BY last_run DESC LIMIT 1`);
     if (result && result.last_run) {
-      const lastRunDate = new Date(result.last_run).toISOString().split('T')[0];
+      const lastRunDate = colombiaDateKey(new Date(result.last_run));
       if (lastRunDate === today) {
         lastExecutionDate = today;
         return true;
@@ -91,7 +100,7 @@ async function executeWorkerIfNeeded() {
     // Importar y ejecutar para solo este usuario
     await processUserImproved(user);
     
-    const today = new Date().toISOString().split('T')[0];
+    const today = colombiaDateKey();
     lastExecutionDate = today;
     executedToday = true;
     lastExecutionError = null;
